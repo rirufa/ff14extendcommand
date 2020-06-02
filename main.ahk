@@ -46,6 +46,10 @@ class FF14CommandParser
 {
    ExecuteMarco(script){
       Sleep 100  ;特殊キーが混じることがあるので待機
+      IfWinNotActive ,ahk_class FFXIVGAME ;ff14がアクティブな時以外は実行しない
+      {
+         return
+      }
       loop, parse, script, "`n"
       {
          cmd := this.ParseCommand(A_LoopField)
