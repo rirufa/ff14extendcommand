@@ -67,6 +67,11 @@ class FF14CommandParser
       {
          return
       }
+      status := this.GetCrafterStatus()
+      if(status.making == 0)
+      {
+         return
+      }
       loop, parse, script, "`n"
       {
          cmd := this.ParseCommand(A_LoopField)
@@ -124,6 +129,7 @@ class FF14CommandParser
       result := Object()
       result.Insert("workload", this.ParseProgress(list[1]))
       result.Insert("quality", this.ParseProgress(list[2]))
+      result.Insert("making", result.workload.now != "" && result.workload.max != "" && result.quality.now != "" && result.quality.max != "")
       return result
    }
 
