@@ -1,18 +1,19 @@
 ﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 
-;クラフターの品質と工数の数値をスクリーン座標で指定する
-CRAFTER_WORK_POS_X := 1020
-CRAFTER_WORK_POS_Y := 400
-CRAFTER_WORK_WIDTH := 150
-CRAFTER_WORK_HEIGHT := 200
-
 ;定数
 WAITTIME_EACH_STROKE := 34
+SETTING_FILE_PATH := "setting.dat"
 
 #Include SerDes.ahk
 #Include ocr.ahk
 
-parser := new FF14CommandParser()
+try{
+   setting := SerDes(SETTING_FILE_PATH)
+}Catch e{
+   msgbox, You have to press Ctrl+T
+   setting := {"x": 1020, "y":400, "w":150, "h":200}
+}
+parser := new FF14CommandParser(setting)
 
 +N::
    macro=
@@ -40,6 +41,16 @@ parser := new FF14CommandParser()
    DumpArray(result)
    Return
 
+^T::
+   global SETTING_FILE_PATH
+   rect := GetArea()
+   list := parser.OcrCrafterStatus(rect.x, rect.y, rect.w, rect.h)
+   text := "It got crafter status. Please reload. If you feel bad, you can change anytime."
+   dumped := SerDes(list)
+   msgbox %text%`n%dumped%
+   SerDes(rect, SETTING_FILE_PATH)
+   Return
+
 Esc::
    ;ゲームにも送る
    ControlSend, ,{esc} ,ahk_class FFXIVGAME
@@ -47,6 +58,9 @@ Esc::
 
 class FF14CommandParser
 {
+   __New(param){
+      this.crafter_pos := param
+   }
    ExecuteMarco(script){
       Sleep 100  ;特殊キーが混じることがあるので待機
       IfWinNotActive ,ahk_class FFXIVGAME ;ff14がアクティブな時以外は実行しない
@@ -96,13 +110,17 @@ class FF14CommandParser
       return output
    }
 
-   GetCrafterStatus(){
-      global CRAFTER_WORK_POS_X, CRAFTER_WORK_POS_Y, CRAFTER_WORK_WIDTH, CRAFTER_WORK_HEIGHT
+   OcrCrafterStatus(X,Y,W,H){
       WinGet, hWnd, ID, ahk_class FFXIVGAME
-      hBitmap := HBitmapFromHwnd(hWnd, CRAFTER_WORK_POS_X, CRAFTER_WORK_POS_Y, CRAFTER_WORK_WIDTH, CRAFTER_WORK_HEIGHT)
+      hBitmap := HBitmapFromHwnd(hWnd, X, Y, W, H)
       pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap)
       DllCall("DeleteObject", "Ptr", hBitmap)
       list := ocr(pIRandomAccessStream, "en")
+      return list
+   }
+
+   GetCrafterStatus(){
+      list := this.OcrCrafterStatus(this.crafter_pos.x, this.crafter_pos.y, this.crafter_pos.w, this.crafter_pos.h)
       result := Object()
       result.Insert("workload", this.ParseProgress(list[1]))
       result.Insert("quality", this.ParseProgress(list[2]))
