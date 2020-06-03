@@ -6,6 +6,9 @@ CRAFTER_WORK_POS_Y := 400
 CRAFTER_WORK_WIDTH := 150
 CRAFTER_WORK_HEIGHT := 200
 
+;定数
+WAITTIME_EACH_STROKE := 34
+
 #Include SerDes.ahk
 #Include ocr.ahk
 
@@ -65,10 +68,11 @@ class FF14CommandParser
 
    SendText(text)
    {
+      global WAITTIME_EACH_STROKE
       loop, parse, text
       {
          ControlSendRaw, ,%A_LoopField% ,ahk_class FFXIVGAME
-         Sleep 34
+         Sleep WAITTIME_EACH_STROKE
       }
    }
 
