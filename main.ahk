@@ -1,7 +1,7 @@
 ﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 
 ;定数
-WAITTIME_EACH_STROKE := 34
+WAITTIME_EACH_STROKE := 64
 SETTING_FILE_PATH := "setting.dat"
 
 #Include SerDes.ahk
@@ -31,7 +31,7 @@ parser := new FF14CommandParser(setting)
 /acifnw 模範作業
 /acifnw 模範作業
 /acifnw 模範作業
-/echo 完成!!
+/echo 完成!! <se.3>
 )
    parser.ExecuteMarco(macro)
    Return
@@ -81,18 +81,16 @@ class FF14CommandParser
          ControlSend, ,{Enter} ,ahk_class FFXIVGAME
          Sleep 3000
       }
-      SoundPlay,*64
       Return
    }
 
    SendText(text)
    {
       global WAITTIME_EACH_STROKE
-      loop, parse, text
-      {
-         ControlSendRaw, ,%A_LoopField% ,ahk_class FFXIVGAME
-         Sleep WAITTIME_EACH_STROKE
-      }
+      ControlSend, ,{Enter} ,ahk_class FFXIVGAME
+      Sleep WAITTIME_EACH_STROKE
+      ControlSend, ,{Text}%text% ,ahk_class FFXIVGAME
+      Sleep WAITTIME_EACH_STROKE
    }
 
    ParseCommand(cmd){
