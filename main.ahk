@@ -27,6 +27,7 @@ parser := new FF14CommandParser(setting)
 /acifnq 倹約加工
 /acifnq グレートストライド
 /acifnq ビエルゴの祝福
+/ac ヴェネレーション
 /acifnw 模範作業
 /acifnw 模範作業
 /acifnw 模範作業
