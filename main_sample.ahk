@@ -23,7 +23,10 @@ view := new View()
 /acifnw 模範作業
 /echo 完成!! <se.3>
 )
-   view.ExecuteMacro(macro)
+   if(view.ExecuteMacro(macro) == false)
+   {
+      msgbox %A_ThisHotkey%
+   }
    Return
 
 ^D::
