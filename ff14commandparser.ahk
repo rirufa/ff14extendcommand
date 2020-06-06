@@ -1,5 +1,6 @@
 ﻿class FF14CommandParser
 {
+   WAITTIME_EACH_STROKE := 64
    __New(param){
       this.crafter_pos := param
    }
@@ -28,11 +29,10 @@
 
    SendText(text)
    {
-      global WAITTIME_EACH_STROKE
       ControlSend, ,{Enter} ,ahk_class FFXIVGAME
-      Sleep WAITTIME_EACH_STROKE
+      Sleep this.WAITTIME_EACH_STROKE
       ControlSend, ,{Text}%text% ,ahk_class FFXIVGAME
-      Sleep WAITTIME_EACH_STROKE
+      Sleep this.WAITTIME_EACH_STROKE
    }
 
    ParseCommand(cmd){
