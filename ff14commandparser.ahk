@@ -18,11 +18,12 @@
       loop, parse, script, "`n"
       {
          cmd := this.ParseCommand(A_LoopField)
-         if(cmd == "")
-            continue
-         this.SendText(cmd)
+         this.SendText(cmd["output"])
          ControlSend, ,{Enter} ,ahk_class FFXIVGAME
-         Sleep 3000
+         if(cmd["skip"] == true)
+           Sleep 16
+         else
+           Sleep cmd["wait"]
       }
       Return
    }
@@ -36,23 +37,43 @@
    }
 
    ParseCommand(cmd){
-      token := StrSplit(cmd," ")
+      ;/ac 加工 か /ac 加工 <wait.3>にマッチするかどうか
+      ;token、token1から3に対応するグループが入る
+      result := RegExMatch(cmd, "(\/[a-z]+)\s(\S+)\s?<?([a-z]+)?\.?([0-9]+)?>?", token)
+      if(result == 0)
+          return Object("output","/echo syntax error","wait", 0)
       status := this.GetCrafterStatus()
       output := cmd
-      Switch token[1]
+      Switch token1
       {
         case "/acifnq":
           if(status.quality.now < status.quality.max)
-            output := "/ac" + " " + token[2]
+            output := "/ac" + " " + token2
           else
-            output := "/echo skip-" + token[2]
+            output := ""
         case "/acifnw":
           if(status.workload.now < status.workload.max)
-            output := "/ac" + " " + token[2]
+            output := "/ac" + " " + token2
           else
-            output := "/echo skip-" + token[2]
+            output := ""
+        case "/ac":
+          output := "/ac" + " " + token2
       }
-      return output
+
+      wait := 0
+      if(token3 == "wait" && token4 != "")
+      {
+          wait := token4 * 1000
+      }
+
+      skipflag := false
+      if(output == "")
+      {
+          output := "/echo skipped"
+          skipflag := true
+      }
+
+      return Object("output",output,"wait", wait, "skip", skipflag)
    }
 
    OcrCrafterStatus(X,Y,W,H){
